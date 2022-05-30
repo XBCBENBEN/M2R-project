@@ -1,0 +1,28 @@
+import networkx as nx
+import random
+import xlwt
+
+N = 1000
+ba = nx.Graph()			#undirected
+H = nx.path_graph(N)	#set nodes
+ba.add_nodes_from(H)		#plus nodes
+
+edge_list = []
+i=0
+while (i<N):
+    j=0
+    while(j<i):
+        probability = random.random()
+        if probability < 0.01:
+            ba.add_edge(i,j)
+            edge_list.append((i,j))
+        j +=1
+    i +=1
+
+f = xlwt.Workbook('encoding = utf-8')
+sheet1 = f.add_sheet('sheet1', cell_overwrite_ok = True)
+for i in range(len(edge_list)):
+    sheet1.write(i, 0, edge_list[i][0])
+for j in range(len(edge_list)):
+    sheet1.write(j, 1, edge_list[j][1])
+f.save('edges.xls')

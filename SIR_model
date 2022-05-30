@@ -1,0 +1,86 @@
+import networkx as nx
+import random
+import pandas as pd
+import matplotlib.pyplot as plt
+import time
+
+#create graph
+N = 20
+ba = nx.Graph()			#undirected
+H = nx.path_graph(N)	#set nodes
+ba.add_nodes_from(H)		#plus nodes
+
+def rand_edge(vi,vj,p=0.5):		#default value of p
+    probability =random.random()#generate random value
+    if(probability>p):			#if > p
+        ba.add_edge(vi,vj)  		#connect vi and vj
+
+i=0
+while (i<N):
+    j=0
+    while(j<i):
+            rand_edge(i,j)		#调用rand_edge()
+            j +=1
+    i +=1
+
+#draw the random graph
+pos = nx.circular_layout(ba)
+nx.draw_networkx(ba, pos)
+ax = plt.gca()
+ax.margins(0.20)
+plt.axis("off")
+plt.show()
+
+#initialize all nodes to be Susceptible
+for node in ba.nodes():
+    ba.nodes[node]["state"] = "S"
+
+def updateNodeState(G, node, alpha, beta):
+    if G.nodes[node]["state"] == "I": #infected
+        p = random.random() #generate random number between 0 and 1
+        if p < beta:   # recover rate
+            G.nodes[node]["state"] = "R" #change state to R
+    elif G.nodes[node]["state"] == "S": #susceptible
+        p = random.random() #generate random number between 0 and 1
+        k = 0  #to calculate number of infected neighbours
+        for neibor in G.adj[node]: #go through every neighbous
+            if G.nodes[neibor]["state"] == "I": #if infected, then k+=1
+                k = k + 1
+        if p < 1 - (1 - alpha)**k:  #S are infected, then change to I
+            G.nodes[node]["state"] = "I" 
+            
+def updateNetworkState(G, alpha, beta):
+    for node in G: #go through every node to update their state
+        updateNodeState(G,node, alpha, beta)
+        
+#To count the total number of different states people
+def countSIR(G):
+    S = 0
+    I = 0
+    for node in G:
+        if G.nodes[node]["state"] == "S":
+            S = S + 1
+        elif G.nodes[node]["state"] == "I":
+            I = I + 1
+    return S,I, len(G.nodes) - S - I
+
+#initializing the graph and parameters
+for k in range(1,3):
+    ba.nodes[k]["state"] = "I"  #choose someone to be infected firstly
+ 
+days = 10 #time
+alpha = 0.10 #infected rate
+beta = 0.10 #recover rate
+ 
+#set color to different states of people
+color_dict = {"S":"orange","I":"red","R":"green"}
+
+SIR_list = []
+for t in range(0,days):
+    updateNetworkState(ba,alpha,beta)
+    SIR_list.append(list(countSIR(ba)))
+
+#visualizing the graph
+df = pd.DataFrame(SIR_list,columns=["S","I","R"])
+df.plot(figsize=(9,6),color=[color_dict.get(x) for x in df.columns])
+plt.show()
