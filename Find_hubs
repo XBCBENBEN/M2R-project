@@ -1,0 +1,99 @@
+import networkx as nx
+import csv
+
+#get edges
+edges_types = [int, int]
+edge = []
+with open('C:/Users/XIANGYU CUI/Desktop/M2R_project/edges.csv','r',encoding='utf-8-sig') as f: 
+    f_csv = csv.reader(f)
+    headers = next(f_csv)
+    for row in f_csv:
+        row = tuple(convert(value) for convert, value in zip(edges_types, row))
+        edge.append(row)
+
+#create undirected graph
+G = nx.Graph()
+H = nx.path_graph(1000)
+G.add_nodes_from(H)
+
+#connect nodes with edges
+for i in range(0,5012):
+    G.add_edge(edge[i][0], edge[i][1])
+
+"""find hubs"""
+#by using degree
+k1 = 0
+node_list_deg=[]
+for i in range(0, 999):
+    if G.degree[i] >= k1:
+        k1 = G.degree[i]
+        node_list_deg.append((i, k1))
+print(node_list_deg)
+print(k1)
+
+#Finally we find that the node 789 has largest degree 21.
+
+#by using betweenness
+k2 = 0
+node_list_bet=[]
+betweenness = nx.betweenness_centrality(G, normalized=False) #betweenness is a dict
+betweenness_list_key = list(betweenness) 
+betweenness_list_value = list(betweenness.values())
+for i in range(0, 999):
+    if betweenness_list_value[i] >= k2:
+        k2 = betweenness_list_value[i]
+        node_list_bet.append((betweenness_list_key[i], betweenness_list_value[i]))
+print(node_list_bet)
+print(k2)
+
+#Finally, we find that the node 307 and 789 has largest betweenness centrality about 4521.
+
+#by using eigenvector centrality
+k3 = 0
+node_list_evec = []
+eigenvector = nx.eigenvector_centrality(G)
+eigenvector_list_key = list(eigenvector)
+eigenvector_list_value = list(eigenvector.values())
+for i in range(0, 999):
+    if eigenvector_list_value[i] >= k3:
+        k3 = eigenvector_list_value[i]
+        node_list_evec.append((eigenvector_list_key[i], eigenvector_list_value[i]))
+print(node_list_evec)
+print(k3)
+
+#finally, we find that the node 789 has the largest eigenvector centrality 0.06975.
+
+#by using page rank
+#Since pagerank is related to directed graph, so I choose not to use it to find hubs.
+
+#katz centrality
+k5 = 0
+node_list_katz = []
+katz = nx.katz_centrality(G,alpha=0.1,beta=1.0, max_iter = 10000) #Here alpha has default value 0.3, and it can be changed.
+katz_list_key = list(katz)
+katz_list_value = list(katz.values())
+for i in range(0, 999):
+    if katz_list_value[i] >= k5:
+        k5 = katz_list_value[i]
+        node_list_katz.append((katz_list_key[i], katz_list_value[i]))
+print(node_list_katz)
+print(k5)
+
+#I cannot get the result even I tried to iterate 10000 times.
+
+#by using closeness centrality
+k6 = 0 
+node_list_closeness = []
+closeness = nx.closeness_centrality(G)
+closeness_list_key = list(closeness)
+closeness_list_value = list(closeness.values())
+for i in range(0, 999):
+    if closeness_list_value[i] >= k6:
+        k6 = closeness_list_value[i]
+        node_list_closeness.append(closeness_list_key[i], closeness_list_value[i])
+print(node_list_closeness)
+print(k6)
+
+#finally we find that the node 789 has the largest closeness centrality 0.3477
+
+#Overall, I have to say that node 789 should be the hub in this graph.
