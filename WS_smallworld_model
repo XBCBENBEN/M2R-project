@@ -1,0 +1,109 @@
+import networkx as nx
+import random
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy
+
+#Initialize parameters
+N = 1000 #total number of nodes, lnN = 7
+k = 50 #average path length from each nodes
+p = 0.5  #from p = 0 to p = 1, the model changes from regular to random
+
+#Create the WS model
+G_WS = nx.watts_strogatz_graph(N, k, p)
+
+#visualize model
+pos = nx.circular_layout(G_WS)
+nx.draw_networkx(G_WS, pos)
+ax = plt.gca()
+ax.margins(0.20)
+plt.axis("off")
+plt.show()
+
+#verify WS model
+d_mean = nx.average_shortest_path_length(G_WS)
+print("<d>:", d_mean)
+
+k_mean = 2 * G_WS.number_of_edges() / N
+print("lnN/ln<k>:", numpy.log(N) / numpy.log(k_mean))
+
+average_clustering = nx.average_clustering(G_WS)
+print("<c>:", average_clustering)
+
+#Draw the distance_probability graph
+def plot_dp_graph(N, k):
+    p = range(0,20,1)
+    p_list = []
+    for i in range(20):
+        p1 = p[i] * 0.05
+        p_list.append(p1)
+    p_list.append(1)
+    d_list = []
+    for i in range(21):
+        G_WS_func = nx.watts_strogatz_graph(N, k, p_list[i])
+        d_mean = nx.average_shortest_path_length(G_WS_func)
+        d_list.append(d_mean)
+    plt.plot(p_list, d_list, '-p', color='grey',
+        marker = 'o',
+        markersize=8, linewidth=2,
+        markerfacecolor='red',
+        markeredgecolor='grey',
+        markeredgewidth=2)
+    plt.show()
+    
+def plot_cp_graph(N, k):
+    p = range(0,20,1)
+    p_list = []
+    for i in range(20):
+        p1 = p[i] * 0.05
+        p_list.append(p1)
+    p_list.append(1)
+    c_list = []
+    for i in range(21):
+        G_WS_func = nx.watts_strogatz_graph(N, k, p_list[i])
+        c_mean = nx.average_clustering(G_WS_func)
+        c_list.append(c_mean)
+    plt.plot(p_list, c_list, '-p', color='grey',
+        marker = 'o',
+        markersize=8, linewidth=2,
+        markerfacecolor='green',
+        markeredgecolor='black',
+        markeredgewidth=2)
+    plt.show()
+
+def plot_together(N, k):
+    p = range(0,20,1)
+    p_list = []
+    for i in range(20):
+        p1 = p[i] * 0.05
+        p_list.append(p1)
+    p_list.append(1)
+    #find the average shortest path length
+    d_list = []
+    for i in range(21):
+        G_WS_func = nx.watts_strogatz_graph(N, k, p_list[i])
+        d_mean = nx.average_shortest_path_length(G_WS_func)
+        d_list.append(d_mean)
+    #find average clustering
+    c_list = []
+    for i in range(21):
+        G_WS_func = nx.watts_strogatz_graph(N, k, p_list[i])
+        c_mean = nx.average_clustering(G_WS_func)
+        c_list.append(c_mean)
+    #the line about dp
+    plt.plot(p_list, d_list, '-p', color='grey',
+        marker = 'o',
+        markersize=8, linewidth=2,
+        markerfacecolor='red',
+        markeredgecolor='grey',
+        markeredgewidth=2)
+    #the line about cp
+    plt.plot(p_list, c_list, '-p', color='grey',
+        marker = 'o',
+        markersize=8, linewidth=2,
+        markerfacecolor='green',
+        markeredgecolor='black',
+        markeredgewidth=2)
+    plt.show()
+
+plot_together(1000, 50)
